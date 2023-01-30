@@ -37,7 +37,7 @@ def get_db():
 def main():
     return RedirectResponse(url="/docs/")
 
-@app.get("/helloWorld")
+@app.get("/test")
 def Hello_world():
     return {"message": "hello world"}
 
@@ -70,8 +70,9 @@ def get_person_by_id(id : int, db: Session = Depends(get_db)):
 @app.delete("/person/{id}")
 def delete_person_by_id(id : int, db: Session = Depends(get_db)):
     userOrm = db.query(Models.Person).get(id)
-    db.delete(userOrm)
-    db.commit()
+    if userOrm != None:
+        db.delete(userOrm)
+        db.commit()
 
 
 @app.post("/person/", response_model=Schemas.Person)
