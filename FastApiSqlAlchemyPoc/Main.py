@@ -1,15 +1,18 @@
 from typing import List
 
+import uvicorn
+
 from fastapi import Depends, FastAPI, HTTPException
 # from fastapi.middleware.cors import CORSMiddleware
-from sqlalchemy.orm import Session, joinedload
 from starlette.responses import RedirectResponse
+
+from sqlalchemy.orm import Session, joinedload
+from sqlalchemy import text, select
 
 import Models
 import Schemas
 from Database import SessionLocal, engine
 
-import uvicorn
 
 Models.Base.metadata.create_all(bind=engine)
 
@@ -67,6 +70,19 @@ def get_person_by_id(id : int, db: Session = Depends(get_db)):
     return personDto
 
 
+# Query string example 
+@app.get("/person", response_model=List[Schemas.Person])
+def get_person_by_id(name : str, db: Session = Depends(get_db)):
+    # people = db.query(Models.Person).where(text(f"name == '{name}'"))
+    # people = db.execute(select(Models.Person).where(Models.Person.name == name)).scalars().unique()
+    people: List[Models.Person] = db.scalars(select(Models.Person).where(Models.Person.name == name)).unique(strategy=None).all()
+    listRetPeople: List[Schemas.Person] = []
+    for persOrm in people:
+        personDto: Schemas.Person = Schemas.Person.from_orm(persOrm)
+        listRetPeople.append(personDto)
+    return listRetPeople
+
+
 @app.delete("/person/{id}")
 def delete_person_by_id(id : int, db: Session = Depends(get_db)):
     userOrm = db.query(Models.Person).get(id)
@@ -92,13 +108,15 @@ def add_person(personDto: Schemas.Person, db: Session = Depends(get_db)):
     personDto: Schemas.Person = Schemas.Person.from_orm(personOrm)
     return personDto 
 
-@app.get("/person2/")
+# Direct to Database
+@app.get("/person-db/")
 def get_all_people_2(db: Session = Depends(get_db)):
     # people = db.query(Models.Person).options(joinedload(Models.Person.addresses)).all()
     listPeople = db.query(Models.Person).all()
     return listPeople
 
-@app.get("/person2/{id}")
+# Direct to Database
+@app.get("/person-db/{id}")
 def get_person_by_id_2(id : int, db: Session = Depends(get_db)):
     person = db.query(Models.Person).get(id)
     return person
