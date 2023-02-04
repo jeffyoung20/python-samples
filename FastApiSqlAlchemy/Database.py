@@ -9,7 +9,7 @@ from sqlalchemy.orm import sessionmaker
 # SQLALCHEMY_DATABASE_URL = "mysql://uname:password@url:3306/FastApiPoc"
 SQLALCHEMY_DATABASE_URL = "sqlite:///jeff-test.sqlite"
 
-engine = create_engine(SQLALCHEMY_DATABASE_URL, echo=True)
+engine = create_engine(SQLALCHEMY_DATABASE_URL, echo=False)
 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
