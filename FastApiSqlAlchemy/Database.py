@@ -5,9 +5,13 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 
 
-# SQLALCHEMY_DATABASE_URL = os.getenv("DB_CONN")
-# SQLALCHEMY_DATABASE_URL = "mysql://uname:password@url:3306/FastApiPoc"
-SQLALCHEMY_DATABASE_URL = "sqlite:///jeff-test.sqlite"
+
+# ***** MySQL *****
+# pip install mysqlclient
+SQLALCHEMY_DATABASE_URL = "mysql://root:password@localhost:3306/jeffs-schema"
+
+# ***** SQL Lite *****
+# SQLALCHEMY_DATABASE_URL = "sqlite:///jeff-test.sqlite"
 
 engine = create_engine(SQLALCHEMY_DATABASE_URL, echo=False)
 

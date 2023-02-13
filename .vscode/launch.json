@@ -5,12 +5,12 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "FastApiSqlAlchemyPoc",
+            "name": "FastApiSqlAlchemy",
             "type": "python",
             "request": "launch",
             "module": "Main",
             "justMyCode": true,
-            "cwd": "${workspaceFolder}/FastApiSqlAlchemyPoc"
+            "cwd": "${workspaceFolder}/FastApiSqlAlchemy"
         }
     ]
 }
