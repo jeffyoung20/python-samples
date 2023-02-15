@@ -3,26 +3,29 @@ from typing import List, Optional
 from pydantic import BaseModel
 
 
-class Brick(BaseModel):
-    id: int
-    brick_value: str
-    type: int
-    class Config:
-        orm_mode = True
-
 class Address(BaseModel):
     id: int
     line1: str
-    bricks: Optional[List[Brick]]
+    line2: Optional[str]
+    city: str
+    # state: str
+    zip: int
     class Config:
         orm_mode = True
 
 class Person(BaseModel):
     id: int
-    name: str
-    addresses: Optional[List[Address]]
-
+    first_name: str
+    last_name: str
+    addresses: Optional[List[Address]] =[]
     class Config:
         orm_mode = True
 
+class Team(BaseModel):
+    id: int
+    name: str
+    people: Optional[List[Person]] = []
+    people_ids: Optional[List[int]] = []
+    class Config:
+        orm_mode = True
 
