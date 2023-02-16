@@ -21,10 +21,15 @@ class Person(BaseModel):
     class Config:
         orm_mode = True
 
+class PersonRef(BaseModel):
+    person_id: int
+    class Config:
+        orm_mode = True
+
 class Team(BaseModel):
     id: int
     name: str
-    people: Optional[List[Person | int]] = []
+    people: Optional[List[Person | PersonRef] ] = []
     # people_ids: Optional[List[int]] = []
     class Config:
         orm_mode = True

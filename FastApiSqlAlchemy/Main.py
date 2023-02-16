@@ -124,11 +124,11 @@ def get_all_teams(db: Session = Depends(get_db)):
 def add_person(teamDto: Schemas.Team, db: Session = Depends(get_db)):
     newTeamOrm: Models.Team = Models.Team(name=teamDto.name)
     for personDto in teamDto.people:
-        if type(personDto) != int:
+        if hasattr(personDto,"person_id") == False:
             newPersonOrm: Models.Person = createPersonOrm(personDto)
             newTeamOrm.people.append(newPersonOrm)
         else:
-            personToAddOrm: Models.Person = db.scalars(select(Models.Person).where(Models.Person.id == personDto)).first()
+            personToAddOrm: Models.Person = db.scalars(select(Models.Person).where(Models.Person.id == personDto.person_id)).first()
             if personToAddOrm != None:
                 newTeamOrm.people.append(personToAddOrm)
     db.add(newTeamOrm)
