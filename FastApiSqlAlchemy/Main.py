@@ -124,15 +124,25 @@ def get_all_teams(db: Session = Depends(get_db)):
 def add_person(teamDto: Schemas.Team, db: Session = Depends(get_db)):
     newTeamOrm: Models.Team = Models.Team(name=teamDto.name)
     for personDto in teamDto.people:
-        newPersonOrm: Models.Person = createPersonOrm(personDto)
-        newTeamOrm.people.append(newPersonOrm)
-    for personId in teamDto.people_ids:
-        pass #TODO
+        if type(personDto) != int:
+            newPersonOrm: Models.Person = createPersonOrm(personDto)
+            newTeamOrm.people.append(newPersonOrm)
+        else:
+            personToAddOrm: Models.Person = db.scalars(select(Models.Person).where(Models.Person.id == personDto)).first()
+            if personToAddOrm != None:
+                newTeamOrm.people.append(personToAddOrm)
     db.add(newTeamOrm)
     db.commit()
     teamOrm = db.query(Models.Team).get(newTeamOrm.id)
     teamDto: Schemas.Team = Schemas.Team.from_orm(teamOrm)
     return newTeamOrm 
+
+@app.delete("/team/{id}")
+def delete_team_by_id(id : int, db: Session = Depends(get_db)):
+    teamOrm = db.query(Models.Team).get(id)
+    if teamOrm != None:
+        db.delete(teamOrm)
+        db.commit()
 
 
 #*************** Helper Funcs ***************

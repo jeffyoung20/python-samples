@@ -24,8 +24,8 @@ class Person(BaseModel):
 class Team(BaseModel):
     id: int
     name: str
-    people: Optional[List[Person]] = []
-    people_ids: Optional[List[int]] = []
+    people: Optional[List[Person | int]] = []
+    # people_ids: Optional[List[int]] = []
     class Config:
         orm_mode = True
 
