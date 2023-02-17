@@ -7,7 +7,7 @@ from fastapi import Depends, FastAPI, HTTPException
 from starlette.responses import RedirectResponse
 
 from sqlalchemy.orm import Session, joinedload
-from sqlalchemy import text, select
+from sqlalchemy import text, select, func
 
 import Models
 import Schemas
@@ -77,7 +77,7 @@ def get_person_by_id(id : int, db: Session = Depends(get_db)):
 def get_person_by_id(lname : str, fname: str, db: Session = Depends(get_db)):
     # people = db.query(Models.Person).where(text(f"name == '{name}'"))
     # people = db.execute(select(Models.Person).where(Models.Person.name == name)).scalars().unique()
-    people: List[Models.Person] = db.scalars(select(Models.Person)
+    people: List[Models.Person] = db.scalars(select(Models.Person) 
         .where(Models.Person.last_name.upper() == lname.upper() and Models.Person.first_name.upper() == fname.upper())).unique(strategy=None).all()
     listRetPeople: List[Schemas.Person] = []
     for persOrm in people:
@@ -89,10 +89,6 @@ def get_person_by_id(lname : str, fname: str, db: Session = Depends(get_db)):
 
 @app.post("/person", response_model=Schemas.Person)
 def add_person(personDto: Schemas.Person, db: Session = Depends(get_db)):
-    # newPersonOrm = Models.Person(first_name=personDto.first_name, last_name=personDto.last_name)
-    # for addrDto in personDto.addresses:
-    #     newAddrOrm = Models.Address(line1=addrDto.line1, line2=addrDto.line2, city=addrDto.city, zip=addrDto.zip)
-    #     newPersonOrm.addresses.append(newAddrOrm)
     newPersonOrm: Models.Person = createPersonOrm(personDto)
     db.add(newPersonOrm)
     db.commit()
@@ -122,20 +118,27 @@ def get_all_teams(db: Session = Depends(get_db)):
 
 @app.post("/team", response_model=Schemas.Team)
 def add_person(teamDto: Schemas.Team, db: Session = Depends(get_db)):
-    newTeamOrm: Models.Team = Models.Team(name=teamDto.name)
+    teamOrm: Schemas.Team = db.scalars(select(Models.Team).where(func.upper(Models.Team.name) == teamDto.name.upper())).first()
+    if teamOrm == None:
+        teamOrm: Models.Team = Models.Team(name=teamDto.name)
+    else:
+        teamOrm.people = []
     for personDto in teamDto.people:
-        if hasattr(personDto,"person_id") == False:
-            newPersonOrm: Models.Person = createPersonOrm(personDto)
-            newTeamOrm.people.append(newPersonOrm)
-        else:
+        if hasattr(personDto,"person_id") :
             personToAddOrm: Models.Person = db.scalars(select(Models.Person).where(Models.Person.id == personDto.person_id)).first()
             if personToAddOrm != None:
-                newTeamOrm.people.append(personToAddOrm)
-    db.add(newTeamOrm)
+                teamOrm.people.append(personToAddOrm)
+        else:
+            personToAddOrm: Models.Person = db.scalars(select(Models.Person)
+                .where(func.upper(Models.Person.first_name) == personDto.first_name.upper() and func.upper(Models.Person.last_name) == personDto.last_name.upper())).first()
+            if personToAddOrm == None:
+                personToAddOrm = createPersonOrm(personDto)
+            teamOrm.people.append(personToAddOrm)
+    db.add(teamOrm)
     db.commit()
-    teamOrm = db.query(Models.Team).get(newTeamOrm.id)
-    teamDto: Schemas.Team = Schemas.Team.from_orm(teamOrm)
-    return newTeamOrm 
+    teamOrmRet = db.scalars(select(Models.Team).where(Models.Team.id == teamOrm.id)).first()
+    teamDtoReturn: Schemas.Team = Schemas.Team.from_orm(teamOrmRet)
+    return teamDtoReturn 
 
 @app.delete("/team/{id}")
 def delete_team_by_id(id : int, db: Session = Depends(get_db)):
