@@ -4,17 +4,17 @@ from pydantic import BaseModel
 
 
 class Address(BaseModel):
-    id: int
+    id: Optional[int]
     line1: str
     line2: Optional[str]
-    city: str
-    # state: str
-    zip: int
+    city: Optional[str]
+    state: Optional[str]
+    zip: Optional[int]
     class Config:
         orm_mode = True
 
 class Person(BaseModel):
-    id: int
+    id: Optional[int]
     first_name: str
     last_name: str
     addresses: Optional[List[Address]] =[]
@@ -27,7 +27,7 @@ class PersonRef(BaseModel):
         orm_mode = True
 
 class Team(BaseModel):
-    id: int
+    id: Optional[int]
     name: str
     people: Optional[List[Person | PersonRef] ] = []
     # people_ids: Optional[List[int]] = []

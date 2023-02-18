@@ -45,18 +45,14 @@ def Hello_world():
     return {"message": "hello world"}
 
 
+
+#*************** PERSON ***************
 @app.get("/person", response_model=List[Schemas.Person])
 def get_all_people(db: Session = Depends(get_db)):
     # people = db.query(Models.Person).options(joinedload(Models.Person.addresses)).all()
-    people = db.query(Models.Person).all()
+    people = db.scalars(select(Models.Person)).unique().all()
 
     listRetPeople: List[Schemas.Person] = []
-    # for pers in people:
-    #     listAddr = []
-    #     for addr in pers.addresses:
-    #         listAddr.append( Schemas.Address(id=addr.id, line1=addr.line1))
-    #     retPerson = Schemas.Person(id=pers.id,name=pers.name,addresses=listAddr)
-    #     listRetPeople.append(retPerson)
     for persOrm in people:
         persDto: Schemas.Person = Schemas.Person.from_orm(persOrm)
         listRetPeople.append(persDto)
@@ -65,7 +61,7 @@ def get_all_people(db: Session = Depends(get_db)):
 
 @app.get("/person/{id}", response_model=Schemas.Person)
 def get_person_by_id(id : int, db: Session = Depends(get_db)):
-    personOrm = db.query(Models.Person).get(id)
+    personOrm = db.scalars(select(Models.Person).where(Models.Person.id == id)).unique().first()
     personDto: Schemas.Person = None
     if personOrm is not None:
         personDto = Schemas.Person.from_orm(personOrm)
@@ -73,12 +69,12 @@ def get_person_by_id(id : int, db: Session = Depends(get_db)):
 
 
 # Query string example 
-@app.get("/person", response_model=List[Schemas.Person])
-def get_person_by_id(lname : str, fname: str, db: Session = Depends(get_db)):
-    # people = db.query(Models.Person).where(text(f"name == '{name}'"))
-    # people = db.execute(select(Models.Person).where(Models.Person.name == name)).scalars().unique()
+@app.get("/person/", response_model=List[Schemas.Person])
+def get_person_by_fname_lname(lname : str, fname: str, db: Session = Depends(get_db)):
     people: List[Models.Person] = db.scalars(select(Models.Person) 
-        .where(Models.Person.last_name.upper() == lname.upper() and Models.Person.first_name.upper() == fname.upper())).unique(strategy=None).all()
+        .where(func.upper(Models.Person.last_name) == lname.upper() \
+            and func.upper(Models.Person.first_name) == fname.upper())) \
+        .unique(strategy=None).all()
     listRetPeople: List[Schemas.Person] = []
     for persOrm in people:
         personDto: Schemas.Person = Schemas.Person.from_orm(persOrm)
@@ -87,14 +83,17 @@ def get_person_by_id(lname : str, fname: str, db: Session = Depends(get_db)):
 
 
 
-@app.post("/person", response_model=Schemas.Person)
-def add_person(personDto: Schemas.Person, db: Session = Depends(get_db)):
-    newPersonOrm: Models.Person = createPersonOrm(personDto)
-    db.add(newPersonOrm)
-    db.commit()
-    personOrm = db.query(Models.Person).get(newPersonOrm.id)
-    personDto: Schemas.Person = Schemas.Person.from_orm(personOrm)
-    return personDto 
+@app.post("/person", response_model=List[Schemas.Person])
+def add_person(personDtoList: List[Schemas.Person], db: Session = Depends(get_db)):
+    personDtoListOut: List[Schemas.Person] = []
+    for personDto in personDtoList:
+        newPersonOrm: Models.Person = createPersonOrm(personDto)
+        db.add(newPersonOrm)
+        db.commit()
+        personOrm = db.query(Models.Person).get(newPersonOrm.id)
+        personDto: Schemas.Person = Schemas.Person.from_orm(personOrm)
+        personDtoListOut.append(personDto)
+    return personDtoListOut 
 
 
 @app.delete("/person/{id}")
@@ -116,29 +115,46 @@ def get_all_teams(db: Session = Depends(get_db)):
         listRetTeams.append(teamDto)
     return listRetTeams
 
-@app.post("/team", response_model=Schemas.Team)
-def add_person(teamDto: Schemas.Team, db: Session = Depends(get_db)):
-    teamOrm: Schemas.Team = db.scalars(select(Models.Team).where(func.upper(Models.Team.name) == teamDto.name.upper())).first()
-    if teamOrm == None:
-        teamOrm: Models.Team = Models.Team(name=teamDto.name)
-    else:
-        teamOrm.people = []
-    for personDto in teamDto.people:
-        if hasattr(personDto,"person_id") :
-            personToAddOrm: Models.Person = db.scalars(select(Models.Person).where(Models.Person.id == personDto.person_id)).first()
-            if personToAddOrm != None:
-                teamOrm.people.append(personToAddOrm)
+@app.post("/team", response_model=List[Schemas.Team])
+def add_person(teamsListDto: List[Schemas.Team], db: Session = Depends(get_db)):
+    teamsListDtoOut: List[Schemas.Team] = []
+    for teamDto in teamsListDto:
+        insertTeam: bool = False
+        teamOrm: Schemas.Team = db.scalars(select(Models.Team).where(func.upper(Models.Team.name) == teamDto.name.upper())).first()
+        if teamOrm == None:
+            teamOrm: Models.Team = Models.Team(name=teamDto.name)
+            insertTeam = True
         else:
-            personToAddOrm: Models.Person = db.scalars(select(Models.Person)
-                .where(func.upper(Models.Person.first_name) == personDto.first_name.upper() and func.upper(Models.Person.last_name) == personDto.last_name.upper())).first()
-            if personToAddOrm == None:
-                personToAddOrm = createPersonOrm(personDto)
-            teamOrm.people.append(personToAddOrm)
-    db.add(teamOrm)
-    db.commit()
-    teamOrmRet = db.scalars(select(Models.Team).where(Models.Team.id == teamOrm.id)).first()
-    teamDtoReturn: Schemas.Team = Schemas.Team.from_orm(teamOrmRet)
-    return teamDtoReturn 
+            teamOrm.people = []
+        for personDto in teamDto.people:
+            if hasattr(personDto,"person_id") :
+                personToAddOrm: Models.Person = db.scalars(select(Models.Person).where(Models.Person.id == personDto.person_id)).first()
+                if personToAddOrm != None:
+                    teamOrm.people.append(personToAddOrm)
+            else:
+                personToAddOrm: Models.Person = db.scalars(select(Models.Person)
+                    .where(func.upper(Models.Person.first_name) == personDto.first_name.upper() \
+                        and func.upper(Models.Person.last_name) == personDto.last_name.upper())) \
+                    .first()
+                if personToAddOrm != None:
+                    personToAddOrm.addresses.clear()
+                    for addressDto in personDto.addresses:
+                        addressToAddOrm: Models.Address = \
+                            Models.Address(line1=addressDto.line1, line2=addressDto.line2, city=addressDto.city, \
+                                state=addressDto.state, zip=addressDto.zip)
+                        # db.add(addressToAddOrm)
+                        personToAddOrm.addresses.append(addressToAddOrm)
+                else:
+                    personToAddOrm = createPersonOrm(personDto)
+                teamOrm.people.append(personToAddOrm)
+        if insertTeam:
+            db.add(teamOrm)
+        db.commit()
+        teamOrmRet = db.scalars(select(Models.Team).where(Models.Team.id == teamOrm.id)).first()
+        teamDtoReturn: Schemas.Team = Schemas.Team.from_orm(teamOrmRet)
+        teamsListDtoOut.append(teamDtoReturn)
+    return teamsListDtoOut
+
 
 @app.delete("/team/{id}")
 def delete_team_by_id(id : int, db: Session = Depends(get_db)):
