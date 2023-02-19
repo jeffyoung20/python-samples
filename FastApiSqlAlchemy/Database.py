@@ -8,7 +8,7 @@ from sqlalchemy.orm import sessionmaker
 
 # ***** MySQL *****
 # pip install mysqlclient
-# SQLALCHEMY_DATABASE_URL = "mysql://root:password@localhost:3306/jeffs-schema"
+# SQLALCHEMY_DATABASE_URL = "mysql://root:password@localhost:3306/organization-db"
 
 # ***** SQL Lite *****
 SQLALCHEMY_DATABASE_URL = "sqlite:///organization-db.sqlite"

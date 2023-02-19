@@ -49,7 +49,6 @@ def Hello_world():
 #*************** PERSON ***************
 @app.get("/person", response_model=List[Schemas.Person])
 def get_all_people(db: Session = Depends(get_db)):
-    # people = db.scalars(select(Models.Person)).unique().all()
     people = getPersonAll(db)
 
     listRetPeople: List[Schemas.Person] = []
@@ -61,7 +60,6 @@ def get_all_people(db: Session = Depends(get_db)):
 
 @app.get("/person/{id}", response_model=Schemas.Person)
 def get_person_by_id(id : int, db: Session = Depends(get_db)):
-    # personOrm = db.scalars(select(Models.Person).where(Models.Person.id == id)).unique().first()
     personOrm: Models.Person = getPersonById(db, id)
     personDto: Schemas.Person = None
     if personOrm is not None:
@@ -72,17 +70,6 @@ def get_person_by_id(id : int, db: Session = Depends(get_db)):
 # Query string example 
 @app.get("/person/", response_model=Schemas.Person)
 def get_person_by_fname_lname(lname : str, fname: str, db: Session = Depends(get_db)):
-    # personOrm: Models.Person = getPersonByLNameFName(db, personDto.last_name, personDto.first_name) 
-    # people: List[Models.Person] = db.scalars(select(Models.Person) 
-    #     .where(func.upper(Models.Person.last_name) == lname.upper() \
-    #         and func.upper(Models.Person.first_name) == fname.upper())) \
-    #     .unique(strategy=None).all()
-    # people: List[Models.Person] = getPersonByLNameFName(db, lname, fname)
-    # listRetPeople: List[Schemas.Person] = []
-    # for persOrm in people:
-    #     personDto: Schemas.Person = Schemas.Person.from_orm(persOrm)
-    #     listRetPeople.append(personDto)
-    # return listRetPeople
     persOrm: Models.Person = getPersonByLNameFName(db, lname, fname)
     return Schemas.Person.from_orm(persOrm)
 
@@ -93,17 +80,14 @@ def add_person(personDtoList: List[Schemas.Person], db: Session = Depends(get_db
     personDtoListOut: List[Schemas.Person] = []
     for personDto in personDtoList:
         personToUpdateOrm: Models.Person = getPersonByLNameFName(db, personDto.last_name, personDto.first_name) 
-        # personToUpdateOrm: Models.Person = db.scalars(select(Models.Person)
-        #     .where(func.upper(Models.Person.first_name) == personDto.first_name.upper() \
-        #         and func.upper(Models.Person.last_name) == personDto.last_name.upper())) \
-        #     .first()
         if personToUpdateOrm == None:
             personToUpdateOrm = createPersonOrm(personDto)
             db.add(personToUpdateOrm)
         else:
             updatePersonOrm(personDto, personToUpdateOrm)
         db.commit()
-        personOrm = db.query(Models.Person).get(personToUpdateOrm.id)
+        # personOrm = db.query(Models.Person).get(personToUpdateOrm.id)
+        personOrm = getPersonById(db, personToUpdateOrm.id)
         personDto: Schemas.Person = Schemas.Person.from_orm(personOrm)
         personDtoListOut.append(personDto)
     return personDtoListOut 
@@ -111,7 +95,6 @@ def add_person(personDtoList: List[Schemas.Person], db: Session = Depends(get_db
 
 @app.delete("/person/{id}")
 def delete_person_by_id(id : int, db: Session = Depends(get_db)):
-    # personOrm = db.query(Models.Person).get(id)
     personOrm: Models.Person = getPersonById(db, id)
     if personOrm != None:
         db.delete(personOrm)
@@ -131,7 +114,6 @@ def get_all_teams(db: Session = Depends(get_db)):
 
 @app.get("/team/{id}", response_model=Schemas.Team)
 def get_team_by_id(id : int, db: Session = Depends(get_db)):
-    # teamOrm = db.scalars(select(Models.Team).where(Models.Team.id == id)).unique().first()
     teamOrm: Models.Team = getTeamById(db, id)
     teamDto: Schemas.Person = None
     if teamOrm is not None:
@@ -143,7 +125,6 @@ def add_teams(teamsListDto: List[Schemas.Team], db: Session = Depends(get_db)):
     teamsListDtoOut: List[Schemas.Team] = []
     for teamDto in teamsListDto:
         teamOrm: Models.Team = getTeamByName(db, teamDto.name)
-        # teamOrm: Schemas.Team = db.scalars(select(Models.Team).where(func.upper(Models.Team.name) == teamDto.name.upper())).first()
         if teamOrm == None:
             teamOrm: Models.Team = Models.Team(name=teamDto.name)
             db.add(teamOrm)
@@ -152,16 +133,11 @@ def add_teams(teamsListDto: List[Schemas.Team], db: Session = Depends(get_db)):
         for personDto in teamDto.people:
             if hasattr(personDto,"person_id") :
                 # ********** Reference ID *********
-                # personToAddOrm: Models.Person = db.scalars(select(Models.Person).where(Models.Person.id == personDto.person_id)).first()
                 personToAddOrm: Models.Person = getPersonById(db, personDto.person_id)
                 if personToAddOrm != None:
                     teamOrm.people.append(personToAddOrm)
             else:
                 personToAddOrm: Models.Person = getPersonByLNameFName(db, personDto.last_name, personDto.first_name) 
-                # personToAddOrm: Models.Person = db.scalars(select(Models.Person)
-                #     .where(func.upper(Models.Person.first_name) == personDto.first_name.upper() \
-                #         and func.upper(Models.Person.last_name) == personDto.last_name.upper())) \
-                #     .first()
                 if personToAddOrm == None:
                     # ********** Add Person *********
                     personToAddOrm = createPersonOrm(personDto)

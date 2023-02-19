@@ -18,7 +18,7 @@ class Person(Base):
     id = Column(Integer, primary_key=True, index=True)
     first_name = Column(String(255))
     last_name = Column(String(255))
-    addresses = relationship("Address", lazy="joined")
+    addresses = relationship("Address", lazy="joined", cascade="all, delete-orphan")
     team_id = Column(Integer, ForeignKey("Team.id"))
 
 
