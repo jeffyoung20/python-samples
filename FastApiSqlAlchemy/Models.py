@@ -9,8 +9,8 @@ class Team(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String(255))
-    # country = Column(String(255), index=True)
-    people = relationship("Person", lazy="joined")
+    # people = relationship("Person", lazy="joined")
+    people = relationship("Person", lazy="select")
 
 class Person(Base):
     __tablename__ = "Person"
@@ -18,7 +18,8 @@ class Person(Base):
     id = Column(Integer, primary_key=True, index=True)
     first_name = Column(String(255))
     last_name = Column(String(255))
-    addresses = relationship("Address", lazy="joined", cascade="all, delete-orphan")
+    # addresses = relationship("Address", lazy="joined", cascade="all, delete-orphan")
+    addresses = relationship("Address", lazy="select", cascade="all, delete-orphan")
     team_id = Column(Integer, ForeignKey("Team.id"))
 
 
