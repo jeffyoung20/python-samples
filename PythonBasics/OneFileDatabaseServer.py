@@ -6,12 +6,22 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 
 
-# ***** Database Config *****
+# ***** Database Setup *****
 # SQLALCHEMY_DATABASE_URL = "sqlite:///one-file-db-server-db.sqlite"
 SQLALCHEMY_DATABASE_URL = "mysql://root:password@localhost:3306/test-db"
 engine = create_engine(SQLALCHEMY_DATABASE_URL, echo=False)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
+
+class Person(Base):
+    __tablename__ = "Person"
+
+    id = Column(Integer, primary_key=True, index=True)
+    first_name = Column(String(255))
+    last_name = Column(String(255))
+
+#Create DB Tables
+Base.metadata.create_all(bind=engine)
 
 
 # ***** web Server Config *****
@@ -36,16 +46,6 @@ def addPerson(person: dict):
     db.commit()
     db.close()
 
-
-class Person(Base):
-    __tablename__ = "Person"
-
-    id = Column(Integer, primary_key=True, index=True)
-    first_name = Column(String(255))
-    last_name = Column(String(255))
-
-
-Base.metadata.create_all(bind=engine)
 
 
 uvicorn.run(app,host="127.0.0.1", port=8080)
