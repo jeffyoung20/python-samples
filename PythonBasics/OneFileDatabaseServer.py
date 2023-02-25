@@ -7,8 +7,8 @@ from sqlalchemy.orm import sessionmaker
 
 
 # ***** Database Setup *****
-# SQLALCHEMY_DATABASE_URL = "sqlite:///one-file-db-server-db.sqlite"
-SQLALCHEMY_DATABASE_URL = "mysql://root:password@localhost:3306/test-db"
+SQLALCHEMY_DATABASE_URL = "sqlite:///one-file-db-server-db.sqlite"
+# SQLALCHEMY_DATABASE_URL = "mysql://root:password@localhost:3306/test-db"
 engine = create_engine(SQLALCHEMY_DATABASE_URL, echo=False)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
@@ -35,8 +35,9 @@ def helloWorld():
 @app.get('/person')
 def getPerson():
     db =  SessionLocal()
-    return db.scalars(select(Person)).unique().all() 
+    result = db.scalars(select(Person)).unique().all() 
     db.close()
+    return result
 
 @app.post('/person')
 def addPerson(person: dict):
