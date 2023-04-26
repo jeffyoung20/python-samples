@@ -9,9 +9,9 @@ from starlette.responses import RedirectResponse
 from sqlalchemy.orm import Session, joinedload
 from sqlalchemy import text, select, func
 
-import Models
-import DTOs
-from Database import SessionLocal, engine
+import FastApiSqlAlchemy.Models as Models
+import FastApiSqlAlchemy.DTOs as DTOs
+from FastApiSqlAlchemy.Database import SessionLocal, engine
 
 
 Models.Base.metadata.create_all(bind=engine)

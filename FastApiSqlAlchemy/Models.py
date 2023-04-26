@@ -1,7 +1,8 @@
 from sqlalchemy import Column, Integer, String, ForeignKey
 from sqlalchemy.types import Date
 from sqlalchemy.orm import relationship
-from Database import Base
+
+from FastApiSqlAlchemy.Database import Base
 
 
 class Team(Base):

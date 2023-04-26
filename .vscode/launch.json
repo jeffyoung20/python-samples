@@ -5,12 +5,27 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "FastApiSqlAlchemy",
+            "name": "uvicorn - FastApiSqlAlchemy",
             "type": "python",
             "request": "launch",
-            "module": "Main",
+            "module": "uvicorn",
+            "args": [
+                "FastApiSqlAlchemy.Main:app",
+                "--host",
+                "127.0.0.1",
+                "--port",
+                "8080"
+            ],
+            "jinja": true,
+            "justMyCode": true
+        },
+        {
+            "name": "code - FastApiSqlAlchemy",
+            "type": "python",
+            "request": "launch",
+            "module": "FastApiSqlAlchemy.Main",
             "justMyCode": true,
-            "cwd": "${workspaceFolder}/FastApiSqlAlchemy"
+            "cwd": "${workspaceFolder}"
         }
     ]
 }
