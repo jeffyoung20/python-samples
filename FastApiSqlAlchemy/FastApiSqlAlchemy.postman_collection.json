@@ -1,0 +1,204 @@
+{
+	"info": {
+		"_postman_id": "3a420402-100f-4d2a-b153-6db4dfa8f3fc",
+		"name": "FastApiSqlAlchemy",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Person (ALL)",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "localhost:8080/person",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"person"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Person By Name",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "localhost:8080/person/?fname=Jeff&lname=Young",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"person",
+						""
+					],
+					"query": [
+						{
+							"key": "fname",
+							"value": "Jeff"
+						},
+						{
+							"key": "lname",
+							"value": "Young"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Person By ID",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "localhost:8080/person/5",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"person",
+						"5"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Person By ID",
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "localhost:8080/person/6",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"person",
+						"6"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Person",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "[\r\n    {\r\n        \"first_name\": \"Bill\",\r\n        \"last_name\": \"Clinton\",\r\n        \"addresses\": [\r\n            {\r\n                \"id\": 7,\r\n                \"line1\": \"777 EZ Street\",\r\n                \"line2\": \"co: Jeff\",\r\n                \"city\": \"anytown\",\r\n                \"state\": \"PA\",\r\n                \"zip\": 12334\r\n            }\r\n        ]\r\n    }\r\n]",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:8080/person",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"person"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Team (ALL)",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "localhost:8080/team",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"team"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Team By Id",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "localhost:8080/team/1",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"team",
+						"1"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Team",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "[\r\n    {\r\n        \"id\": 0,\r\n        \"name\": \"Presidents\",\r\n        \"people\": [\r\n            {\r\n                \"person_id\": 3\r\n            },\r\n            {\r\n                \"id\": 5,\r\n                \"first_name\": \"John\",\r\n                \"last_name\": \"Adams\",\r\n                \"addresses\": [\r\n                    {\r\n                        \"id\": 7,\r\n                        \"line1\": \"777 EZ Street\",\r\n                        \"line2\": \"co: ron\",\r\n                        \"city\": \"philly\",\r\n                        \"state\": \"PA\",\r\n                        \"zip\": 12334\r\n                    }\r\n                ]\r\n            },\r\n            {\r\n                \"first_name\": \"Abe\",\r\n                \"last_name\": \"Lincoln\",\r\n                \"addresses\": [\r\n                    {\r\n                        \"line1\": \"777 Washignton Ave\",\r\n                        \"line2\": \"co: ron\",\r\n                        \"city\": \"Springfiled\",\r\n                        \"state\": \"IL\",\r\n                        \"zip\": 12334\r\n                    }\r\n                ]\r\n            }\r\n\r\n        ]\r\n    }\r\n]",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:8080/team",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"team"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Team By Id",
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "localhost:8080/team/6",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"team",
+						"6"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
