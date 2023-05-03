@@ -63,7 +63,9 @@ def get_all_people(db: Session = Depends(get_db)):
 def get_person_by_id(id : int, db: Session = Depends(get_db)):
     personOrm: Models.Person = getPersonById(db, id)
     personDto: DTOs.Person = None
-    if personOrm is not None:
+    if personOrm is None:
+        raise HTTPException(status_code=404, detail="Item not found")
+    else:
         personDto = DTOs.Person.from_orm(personOrm)
     return personDto
 
@@ -72,6 +74,8 @@ def get_person_by_id(id : int, db: Session = Depends(get_db)):
 @app.get("/person/", response_model=DTOs.Person)
 def get_person_by_fname_lname(lname : str, fname: str, db: Session = Depends(get_db)):
     persOrm: Models.Person = getPersonByLNameFName(db, lname, fname)
+    if persOrm is None:
+        raise HTTPException(status_code=404, detail="Item not found")
     return DTOs.Person.from_orm(persOrm)
 
 
@@ -97,7 +101,9 @@ def add_person(personDtoList: List[DTOs.Person], db: Session = Depends(get_db)):
 @app.delete("/person/{id}")
 def delete_person_by_id(id : int, db: Session = Depends(get_db)):
     personOrm: Models.Person = getPersonById(db, id)
-    if personOrm != None:
+    if personOrm == None:
+        raise HTTPException(status_code=404, detail="Item not found")
+    else:
         db.delete(personOrm)
         db.commit()
 
@@ -117,7 +123,9 @@ def get_all_teams(db: Session = Depends(get_db)):
 def get_team_by_id(id : int, db: Session = Depends(get_db)):
     teamOrm: Models.Team = getTeamById(db, id)
     teamDto: DTOs.Person = None
-    if teamOrm is not None:
+    if teamOrm is None:
+        raise HTTPException(status_code=404, detail="Item not found")
+    else:
         teamDto = DTOs.Team.from_orm(teamOrm)
     return teamDto
 
@@ -157,7 +165,9 @@ def add_teams(teamsListDto: List[DTOs.Team], db: Session = Depends(get_db)):
 @app.delete("/team/{id}")
 def delete_team_by_id(id : int, db: Session = Depends(get_db)):
     teamOrm = db.query(Models.Team).get(id)
-    if teamOrm != None:
+    if teamOrm == None:
+        raise HTTPException(status_code=404, detail="Item not found")
+    else:
         db.delete(teamOrm)
         db.commit()
 
