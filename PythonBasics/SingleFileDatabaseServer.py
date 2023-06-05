@@ -25,6 +25,13 @@ Base.metadata.create_all(bind=engine)
 
 # ***** web Server Config *****
 app = FastAPI()
+# app.add_middleware(
+#     CORSMiddleware,
+#     allow_origins=["*"],
+#     allow_credentials=True,
+#     allow_methods=["*"],
+#     allow_headers=["*"],
+# )
 
 @app.get('/hello-world')
 def helloWorld():
