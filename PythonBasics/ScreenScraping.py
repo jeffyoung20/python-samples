@@ -2,15 +2,15 @@ import requests
 from bs4 import BeautifulSoup
 
 def getData(soup, hdrString):
-    tipsContainer = soup.find("h2", string=hdrString).parent.parent
-    tipsTblRows = tipsContainer.find_all("tr", class_="data-table-row")
-    ratesTips = {}
-    for row in tipsTblRows:
+    tblContainer = soup.find("h2", string=hdrString).parent.parent
+    tblRows = tblContainer.find_all("tr", class_="data-table-row")
+    rates = {}
+    for row in tblRows:
         key = row.find_all('th')[0].text.split()
         key = f"{key[1]} {key[2]}"
         value = row.find_all('td')[2].text
-        ratesTips[key] = value
-    return ratesTips
+        rates[key] = value
+    return rates
 
 
 if __name__ == "__main__":
