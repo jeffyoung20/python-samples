@@ -25,7 +25,3 @@ if __name__ == "__main__":
     print(ratesTips)
 
 
-
-
-
-# print(results)
