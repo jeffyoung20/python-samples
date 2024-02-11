@@ -87,6 +87,22 @@ def getFinancialData(driver):
 
     return stats
 
+def printCsvLine(stats):
+    print(f"{stats['Vanguard_VMRXX']}|",
+            "TBD-Ally|",
+            "TBD-Marcus|",
+            f"{stats['BondData']['tipsData']['5 Year']}|",
+            f"{stats['BondData']['treasuryData']['12 Month']}|",
+            f"{stats['BondData']['treasuryData']['2 Year']}|",
+            f"{stats['BondData']['treasuryData']['5 Year']}|",
+            f"{stats['BondData']['treasuryData']['10 Year']}|",
+            f"{stats['gold']}|",
+            f"{stats['bitcoin']}|",
+            f"{stats['oil_wti']}|",
+            f"{stats['stockData']['sp500-yield']}|",
+            f"{stats['stockData']['sp500-forward-pe']}")
+
+
 
 # ********** MAIN **********
 if __name__ == "__main__":
@@ -104,20 +120,7 @@ if __name__ == "__main__":
     print(json.dumps(stats,indent=2))
 
     #Data (csv)  for excel
-    line = (f"{stats['Vanguard_VMRXX']},",
-            "TBD-Ally,",
-            "TBD-Marcus,",
-            f"{stats['BondData']['tipsData']['5 Year']},",
-            f"{stats['BondData']['treasuryData']['12 Month']},",
-            f"{stats['BondData']['treasuryData']['2 Year']},",
-            f"{stats['BondData']['treasuryData']['5 Year']},",
-            f"{stats['BondData']['treasuryData']['10 Year']},",
-            f"{stats['gold']},",
-            f"{stats['bitcoin']},",
-            f"{stats['oil_wti']},",
-            f"{stats['stockData']['sp500-yield']},",
-            f"{stats['stockData']['sp500-forward-pe']},")
-    print(line)
+    printCsvLine(stats)
 
     # Closes Chrome
     # driver.quit()
