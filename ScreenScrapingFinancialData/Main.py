@@ -89,8 +89,8 @@ def getFinancialData(driver):
 
 def printCsvLine(stats):
     print(f"{stats['Vanguard_VMRXX']}|",
-            "TBD-Ally|",
-            "TBD-Marcus|",
+            "TBD|",
+            "TBD|",
             f"{stats['BondData']['tipsData']['5 Year']}|",
             f"{stats['BondData']['treasuryData']['12 Month']}|",
             f"{stats['BondData']['treasuryData']['2 Year']}|",
