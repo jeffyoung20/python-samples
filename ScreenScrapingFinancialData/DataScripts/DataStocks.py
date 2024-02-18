@@ -17,8 +17,10 @@ def getStockData():
     dataOthers = pageData['data']['mdc_peAndYields_{"indexType":"OTHERS"}']['data']['data']['instruments']
     # return {"dow": dataDow, "others":dataOthers}
     return {
-        "sp500-forward-pe":  dataOthers[2]['formattedPriceEarningsRatioEstimate'],
-        "sp500-yield": dataOthers[2]['yield']
+        "sp500-forward-pe":  dataOthers[2]['priceEarningsRatioEstimate'],
+        "sp500-yield": dataOthers[2]['yield'],
+        "dow-forward-pe":  dataDow[0]['priceEarningsRatioEstimate'],
+        "dow-yield": dataDow[0]['yield']
     }
 
 if __name__ == "__main__":

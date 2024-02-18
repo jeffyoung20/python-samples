@@ -3,54 +3,18 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.options import Options
 import json
 
-from BondData import getBondData
-from StockData import getStockData
-
-
-# ***** CNBC *****
-def getCnbcData(driver):
-    dataCnbc = {}
-    url = "https://cnbc.com"
-    driver.get(url)
-    driver.implicitly_wait(0.5)
-    menuButtons = driver.find_elements(by=By.CSS_SELECTOR, value="button.MarketsBannerMenu-marketOption")
-
-    # GOLD
-    gold_button = [btn for btn in menuButtons if btn.text == 'GOLD'][0]
-    gold_button.click()
-    driver.implicitly_wait(0.5)
-    goldSelector = "#market-data-scroll-container > a:nth-child(1) > div:nth-child(1) > span.MarketCard-stockPosition"
-    goldPrice = driver.find_element(by=By.CSS_SELECTOR, value=goldSelector).text
-    # print(goldPrice)
-    dataCnbc['gold']= goldPrice
-
-    # OIL
-    oil_button = [btn for btn in menuButtons if btn.text == 'OIL'][0]
-    oil_button.click()
-    driver.implicitly_wait(0.5)
-    oilSelector = "#market-data-scroll-container > a:nth-child(1) > div:nth-child(1) > span.MarketCard-stockPosition"
-    oilPrice = driver.find_element(by=By.CSS_SELECTOR, value=oilSelector).text
-    # print(oilPrice)
-    dataCnbc['oil_wti']= oilPrice
-
-    # BITCOIN
-    crypto_button = [btn for btn in menuButtons if btn.text == 'CRYPTO'][0]
-    crypto_button.click()
-    driver.implicitly_wait(0.5)
-    bitcoinSelector = "#market-data-scroll-container > a:nth-child(1) > div:nth-child(1) > span.MarketCard-stockPosition"
-    bitcoinPrice = driver.find_element(by=By.CSS_SELECTOR, value=bitcoinSelector).text
-    # print(bitcoinPrice)
-    dataCnbc['bitcoin']= bitcoinPrice
-
-    return dataCnbc
+from DataScripts.DataBonds import getBondData
+from DataScripts.DataStocks import getStockData
+from DataScripts.DataCommodities import getCnbcData
+from DataScripts.DataBanks import getNerdWalletBankSavings as getBankSavingsRates
 
 
 # ***** Vanguard MMF *****
 def getVanguardData(driver):
     data = {}
     url = "https://investor.vanguard.com/investment-products/mutual-funds/profile/vmrxx"
+    driver.implicitly_wait(1.0)
     driver.get(url)
-    driver.implicitly_wait(0.5)
     yieldPctVanguard = driver.find_element(by=By.CSS_SELECTOR, value="#Dashboard > div.container > div > div.col-md-6.col-lg-4.ml-xs-4 > dashboard-stats > div > div:nth-child(3) > div:nth-child(2) > div > h4 > div > h4:nth-child(1)")
     # print(yieldPctVanguard.text)
     data['Vanguard_VMRXX']= yieldPctVanguard.text
@@ -62,45 +26,60 @@ def getFinancialData(driver):
     stats = {}
 
     # ***** Bond Data (Bloomburg)*****
-    dataBonds = getBondData()
-    # tipsData = { "tipsData": dataBonds[0] }
-    # trsyData = { "treasuryData": dataBonds[1] }
-    bondData = {
-        "BondData": {
-            "tipsData": dataBonds[1],
-            "treasuryData": dataBonds[0]
+    try:
+        print("Getting Bond Data....")
+        dataBonds = getBondData()
+        # tipsData = { "tipsData": dataBonds[0] }
+        # trsyData = { "treasuryData": dataBonds[1] }
+        bondData = {
+            "BondData": {
+                "tipsData": dataBonds[1],
+                "treasuryData": dataBonds[0]
+            }
         }
-    }
+    except Exception as e:
+        bondData = {
+            "BondData": "error"
+        }
     stats.update(bondData)
 
-    # ***** Stock Data (WSJ)*****
-    dataStocks = getStockData()
-    stats.update({"stockData": dataStocks})
 
-    # ***** CNBC *****
-    dataCnbc = getCnbcData(driver)
-    stats.update(dataCnbc)
+    # ***** Stock Data (WSJ)*****
+    try:
+        print("Getting Stock Data....")
+        dataStocks = getStockData()
+        stats.update({"stockData": dataStocks})
+    except Exception as e:
+        stats.update({"stockData": "Error"})
+
+    # ***** Get Bank Savings Rates *****
+    try:
+        print("Getting Banks Data....")
+        statsBanks = getBankSavingsRates(driver)
+        stats.update(statsBanks)
+    except:
+        stats.update({"bankSavingsRates": "error"} )
+
+
+    # ***** Commondity (CNBC) *****
+    try:
+        print("Getting Commodity Data....")
+        dataCnbc = getCnbcData(driver)
+        stats.update({"commodities": dataCnbc})
+    except Exception as e:
+        stats.update({"commodities": "error"})
+
 
     # ***** Vanguard Money Market Rate (VMRXX) *****
-    statsVanguard = getVanguardData(driver)
-    stats.update(statsVanguard)
+    try:
+        print("Getting Mutual Fund Sweep Rates....")
+        statsVanguard = getVanguardData(driver)
+        stats.update(statsVanguard)
+    except:
+        stats.update({'Vanguard_VMRXX': "error"})
+
 
     return stats
-
-def printCsvLine(stats):
-    print(f"{stats['Vanguard_VMRXX']}|",
-            "TBD|",
-            "TBD|",
-            f"{stats['BondData']['tipsData']['5 Year']}|",
-            f"{stats['BondData']['treasuryData']['12 Month']}|",
-            f"{stats['BondData']['treasuryData']['2 Year']}|",
-            f"{stats['BondData']['treasuryData']['5 Year']}|",
-            f"{stats['BondData']['treasuryData']['10 Year']}|",
-            f"{stats['gold']}|",
-            f"{stats['bitcoin']}|",
-            f"{stats['oil_wti']}|",
-            f"{stats['stockData']['sp500-yield']}|",
-            f"{stats['stockData']['sp500-forward-pe']}")
 
 
 
@@ -112,15 +91,14 @@ if __name__ == "__main__":
     chrome_options = webdriver.ChromeOptions()
     chrome_options.add_experimental_option("detach", True)
     driver = webdriver.Chrome(options=chrome_options)
+    driver.implicitly_wait(1.0)
+
 
     stats = getFinancialData(driver)
 
     #Results
     print("\n ***** Results *****")
     print(json.dumps(stats,indent=2))
-
-    #Data (csv)  for excel
-    printCsvLine(stats)
 
     # Closes Chrome
     # driver.quit()
